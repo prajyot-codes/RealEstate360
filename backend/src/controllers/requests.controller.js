@@ -6,56 +6,54 @@ import Property from "../models/property.model.js";
 import User from "../models/user.model.js";
 
 // Tenant can create a request for a contract, bill, or maintenance
-export const createRequest = asyncHandler(async (req, res) => {
-    const { propertyId, type, details } = req.body;
+export const createContractRequest = asyncHandler(async (req, res) => {
+    const { propertyId, details } = req.body;
 
-    if (!propertyId || !type) {
-        throw new ApiError(400, "Property ID and request type are required");
+    if (!propertyId) {
+        throw new ApiError(400, "Property ID is required");
     }
 
-    if (!["contract", "bill", "maintenance"].includes(type)) {
-        throw new ApiError(400, "Invalid request type");
-    }
-
-    // Ensure user is logged in and is a tenant
     if (!req.user || req.user.role !== "tenant") {
-        throw new ApiError(401, "Only tenants can create requests");
+        throw new ApiError(401, "Only tenants can create contract requests");
     }
 
+    // Check if the property exists
     const property = await Property.findById(propertyId);
     if (!property) {
         throw new ApiError(404, "Property not found");
     }
 
+    // Get the owner of the property
     const owner = await User.findById(property.owner);
     if (!owner) {
         throw new ApiError(404, "Owner not found for this property");
     }
 
-    // Check if a similar request already exists
+    // Check if a pending contract request already exists
     const existingRequest = await Request.findOne({
         sender: req.user._id,
         receiver: owner._id,
         property: propertyId,
-        type,
+        type: "contract",
         status: "pending",
     });
 
     if (existingRequest) {
-        throw new ApiError(400, "You already have a pending request of this type for this property");
+        throw new ApiError(400, "You already have a pending contract request for this property");
     }
 
-    // Create the new request
+    // Create the contract request
     const newRequest = await Request.create({
         sender: req.user._id,
         receiver: owner._id,
         property: propertyId,
-        type,
+        type: "contract",
         details,
     });
 
-    return res.status(201).json(new ApiResponse(201, newRequest, "Request sent successfully"));
+    return res.status(201).json(new ApiResponse(201, newRequest, "Contract request sent successfully"));
 });
+
 
 
 const getSentRequests = asyncHandler(async (req, res) => {
@@ -88,4 +86,4 @@ const getReceivedRequests = asyncHandler(async (req, res) => {
 });
 
 
-export {getReceivedRequests,getSentRequests,createRequest}
+export {getReceivedRequests,getSentRequests,createContractRequest}

@@ -2,7 +2,7 @@ import { Property } from "../models/property.model.js"
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";  
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { Property } from "../models/property.model.js"; // Ensure you import the Property model
+import { Property } from "../models/property.model.js"; 
 
 const createProperty = asyncHandler(async (req, res) => {
     const { title, description, address, price, size, bedrooms, bathrooms, images } = req.body;
@@ -59,4 +59,14 @@ const getOwnerProperties = asyncHandler(async (req, res) => {
 });
 
 
-export { createProperty,getOwnerProperties };
+const getAllProperties=asyncHandler(async (res,req) => {
+    const properties= await Property.find();
+    
+    if(!properties){
+        throw new ApiError(500,"Error while fetching the prooperties");
+    }
+
+    return res.status(200).json(new ApiResponse(200,"Properties fetched successfully"))
+})
+
+export {createProperty,getOwnerProperties,getAllProperties};

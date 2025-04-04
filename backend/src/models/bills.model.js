@@ -1,25 +1,14 @@
 import mongoose from "mongoose";
 
-
 const billSchema = new mongoose.Schema({
     contract: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Contract", 
         required: true
     },
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", 
-        required: true
-    },
-    tenant: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // Reference to the tenant
-        required: true
-    },
     property: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Property", // Reference to the property
+        ref: "Property",
         required: true
     },
     amount: {
@@ -32,7 +21,7 @@ const billSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["unpaid", "paid", "overdue"],
+        enum: ["unpaid", "paid", "overdue","any"],
         default: "unpaid"
     },
     paymentDate: {
